@@ -1,0 +1,126 @@
+<api:script xmlns:api="http://apiscript.com/ns?v1" xmlns:xs="http://www.w3.org/2001/XMLSchema">
+
+  <!-- See Column Definitions to specify column behavior and use XPaths to extract column values from JSON. -->
+  <api:info title="Issues" desc="Generated schema file." xmlns:other="http://apiscript.com/ns?v1">
+    <!-- You can modify the name, type, and column size here. -->
+    <attr name="assignee_code" xs:type="string"   readonly="false"              other:xPath="/json/issues/assignee_code" />
+    <attr name="assignee_id"   xs:type="integer"  readonly="false"              other:xPath="/json/issues/assignee_id"   />
+    <attr name="code"          xs:type="string"   readonly="false"              other:xPath="/json/issues/code"          />
+    <attr name="created_at"    xs:type="datetime" readonly="false"              other:xPath="/json/issues/created_at"    />
+    <attr name="custom_id"     xs:type="string"   readonly="false"              other:xPath="/json/issues/custom_id"     />
+    <attr name="finished_at"   xs:type="datetime" readonly="false"              other:xPath="/json/issues/finished_at"   />
+    <attr name="group_code"    xs:type="string"   readonly="false"              other:xPath="/json/issues/group_code"    />
+    <attr name="group_id"      xs:type="integer"  readonly="false"              other:xPath="/json/issues/group_id"      />
+    <attr name="id"            xs:type="integer"  readonly="false" key="true"   other:xPath="/json/issues/id"            />
+    <attr name="memo"          xs:type="string"   readonly="false"              other:xPath="/json/issues/memo"          />
+    <attr name="number"        xs:type="integer"  readonly="false"              other:xPath="/json/issues/number"        />
+    <attr name="repeat"        xs:type="boolean"  readonly="false"              other:xPath="/json/issues/repeat"        />
+    <attr name="stared"        xs:type="boolean"  readonly="false"              other:xPath="/json/issues/stared"        />
+    <attr name="status_id"     xs:type="string"   readonly="false"              other:xPath="/json/issues/status"        />
+    <attr name="title"         xs:type="string"   readonly="false"              other:xPath="/json/issues/title"         />
+    <attr name="updated_at"    xs:type="datetime" readonly="false"              other:xPath="/json/issues/updated_at"    />
+  </api:info>
+
+<api:setm>
+  Column.assignee_code = string
+  Column.assignee_id = integer
+  Column.code = string
+  Column.created_at = datetime
+  Column.custom_id = string
+  Column.finished_at = datetime
+  Column.group_code = string
+  Column.group_id = integer
+  Column.id = integer
+  Column.memo = string
+  Column.number = integer
+  Column.repeat = boolean
+  Column.stared = boolean
+  Column.status_id = string
+  Column.title = string
+  Column.updated_at = datetime
+</api:setm>
+
+  <api:set attr="DataModel" value="DOCUMENT" />
+  <api:set attr="URI" value="https://api.bizer.team/open/api/v1/" />
+
+  <api:set attr="ResourceName" value="issues"/>
+
+  <api:set attr="AccessToken" value="[_connection.BizerAccessToken]"/>
+  <api:set attr="AccessTokenSecret" value="[_connection.BizerAccessTokenSecret]"/>
+
+  <api:set attr="Page" value="1"/>
+  <api:set attr="PerPage" value="20"/>
+
+  <api:set attr="ContentType" value="application/json"/>
+  <api:set attr="Accept" value="application/json"/>
+
+
+  <!-- The GET method corresponds to SELECT. Here you can override the default processing of the SELECT statement. The results of processing are pushed to the schema's output. See SELECT Execution for more information. -->
+  <api:script method="GET">
+    <api:set attr="JSONPath" value="$.issues" />
+
+    <api:set attr="URI" value="https://api.bizer.team/open/api/v1/[ResourceName]?access_token=[AccessToken]&access_token_secret=[AccessTokenSecret]&page=[Page]&per_page=[PerPage]" />
+
+    <api:call op="jsonproviderGet">
+      <api:push/>
+    </api:call>
+  </api:script>
+
+  <!-- To add support for INSERTS please see the INSERT Execution page within the help for further information and examples. -->
+  <api:script method="POST">
+
+    <api:set attr="method" value="POST"/>
+    <api:set attr="URI" value="https://api.bizer.team/open/api/v1/[ResourceName]" />
+    <api:set attr="JSONPath" value="$.issue" />
+
+    <api:set attr="global.requestData" value=""/>
+    <api:set attr="selectcolumns" value="[_query.selectcolumns | replace('\[','') | replace('\]','')]"/>
+
+    <api:enum list="[selectcolumns]" separator=",">
+
+      <api:set attr="value" value=""/>
+
+      <api:select attr="Column.[_value]">
+        <api:case value="string">    <api:set attr="value" value='"[_input.[_value]]"'/> </api:case>
+        <api:case value="boolean">   <api:set attr="value" value='[_input.[_value]]'/> </api:case>
+        <api:case value="datetime">  <api:set attr="value" value='"[_input.[_value]]"'/> </api:case>
+        <api:case value="date">      <api:set attr="value" value='"[_input.[_value]]"'/> </api:case>
+        <api:case value="integer">   <api:set attr="value" value='[_input.[_value]]'/> </api:case>
+        <api:default>                <api:set attr="value" value='"[_input.[_value]]"'/> </api:default>
+      </api:select>
+
+      <api:set attr="global.requestData" value='[global.requestData | equals("","","[global.requestData],")]"[_value]":[value]' />
+    </api:enum>
+
+    <api:set attr="data">
+    {
+        "access_token": "[AccessToken]",
+        "access_token_secret": "[AccessTokenSecret]",
+        "issue": {[global.requestData]}
+    }
+    </api:set>
+
+    <api:call op="jsonproviderGet">
+      <api:push/>
+    </api:call>
+  </api:script>
+
+  <!-- To add support for UPDATES please see the UPDATE Execution page within the help for further information and examples. -->
+  <api:script method="MERGE">
+    <api:set attr="method" value="PUT"/>
+    <api:call op="jsonproviderGet">
+      <api:throw code="500" desc="Updates are not currently supported."/>
+      <api:push/>
+    </api:call>
+  </api:script>
+
+  <!-- To add support for DELETES please see the DELETE Execution page within the help for further information and examples. -->
+  <api:script method="DELETE">
+    <api:set attr="method" value="DELETE"/>
+    <api:call op="jsonproviderGet">
+      <api:throw code="500" desc="Deletes are not currently supported."/>
+      <api:push/>
+    </api:call>
+  </api:script>
+
+</api:script>
